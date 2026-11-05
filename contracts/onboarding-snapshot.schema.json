@@ -1,0 +1,261 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:arkham:synthetic:onboarding-snapshot:1",
+  "title": "Proposed synthetic onboarding snapshot",
+  "description": "Internal documentation contract; not a client write API or proof of implementation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "session_ref",
+    "base_code",
+    "revision",
+    "expires_at",
+    "state",
+    "eligibility",
+    "documents",
+    "simulation_only"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "session_ref": {
+      "type": "string",
+      "pattern": "^SYN-SESSION-[A-Z0-9]+$"
+    },
+    "base_code": {
+      "type": "string",
+      "pattern": "^SYN-BASE-[A-Z0-9]+$"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "state": {
+      "enum": [
+        "scoped",
+        "assessing",
+        "blocked",
+        "ready",
+        "simulated",
+        "expired"
+      ]
+    },
+    "opportunity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "opportunity_ref",
+        "base_code",
+        "catalog_revision",
+        "required_categories"
+      ],
+      "properties": {
+        "opportunity_ref": {
+          "type": "string",
+          "pattern": "^SYN-OPP-[A-Z0-9]+$"
+        },
+        "base_code": {
+          "type": "string",
+          "pattern": "^SYN-BASE-[A-Z0-9]+$"
+        },
+        "catalog_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "required_categories": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "identity",
+              "license"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      }
+    },
+    "eligibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decision",
+        "rule_revision",
+        "reason_codes"
+      ],
+      "properties": {
+        "decision": {
+          "enum": [
+            "eligible",
+            "ineligible",
+            "unknown"
+          ]
+        },
+        "rule_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "reason_codes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]+$"
+          }
+        }
+      }
+    },
+    "documents": {
+      "type": "array",
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "category",
+          "mime_type",
+          "size_bytes"
+        ],
+        "properties": {
+          "category": {
+            "enum": [
+              "identity",
+              "license"
+            ]
+          },
+          "mime_type": {
+            "enum": [
+              "application/pdf",
+              "image/jpeg",
+              "image/png"
+            ]
+          },
+          "size_bytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10485760
+          }
+        }
+      }
+    },
+    "simulation_only": {
+      "const": true
+    },
+    "receipt_ref": {
+      "type": "string",
+      "pattern": "^SYN-RECEIPT-[A-Z0-9]+$"
+    },
+    "idempotency_ref": {
+      "type": "string",
+      "pattern": "^SYN-KEY-[A-Z0-9]+$"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "enum": [
+              "assessing",
+              "blocked",
+              "ready",
+              "simulated"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "opportunity"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "enum": [
+              "ready",
+              "simulated"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "eligibility": {
+            "properties": {
+              "decision": {
+                "const": "eligible"
+              }
+            }
+          },
+          "documents": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "blocked"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "eligibility": {
+            "properties": {
+              "decision": {
+                "enum": [
+                  "ineligible",
+                  "unknown"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "simulated"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "receipt_ref",
+          "idempotency_ref"
+        ]
+      },
+      "else": {
+        "not": {
+          "anyOf": [
+            {
+              "required": [
+                "receipt_ref"
+              ]
+            },
+            {
+              "required": [
+                "idempotency_ref"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

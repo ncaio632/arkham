@@ -1,0 +1,20 @@
+[
+  {
+    "schema": "contracts/onboarding-snapshot.schema.json",
+    "instance": "examples/snapshot.valid.json",
+    "valid": true,
+    "purpose": "Structurally valid synthetic simulated snapshot."
+  },
+  {
+    "schema": "contracts/onboarding-snapshot.schema.json",
+    "instance": "examples/snapshot.invalid-schema.json",
+    "valid": false,
+    "purpose": "Must reject documents[0].size_bytes greater than 10 MiB."
+  },
+  {
+    "schema": "contracts/onboarding-snapshot.schema.json",
+    "instance": "examples/snapshot.invalid-semantic.json",
+    "valid": true,
+    "purpose": "Schema-valid cross-base selection; domain must reject BASE_CONFLICT."
+  }
+]

@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0",
+  "session_ref": "SYN-SESSION-A",
+  "base_code": "SYN-BASE-A",
+  "revision": 5,
+  "expires_at": "2030-01-01T12:00:00Z",
+  "state": "simulated",
+  "opportunity": {
+    "opportunity_ref": "SYN-OPP-A",
+    "base_code": "SYN-BASE-A",
+    "catalog_revision": 1,
+    "required_categories": [
+      "identity",
+      "license"
+    ]
+  },
+  "eligibility": {
+    "decision": "eligible",
+    "rule_revision": 1,
+    "reason_codes": [
+      "SYNTHETIC_RULE_MATCH"
+    ]
+  },
+  "documents": [
+    {
+      "category": "identity",
+      "mime_type": "application/pdf",
+      "size_bytes": 10485761
+    },
+    {
+      "category": "license",
+      "mime_type": "image/png",
+      "size_bytes": 2048
+    }
+  ],
+  "simulation_only": true,
+  "receipt_ref": "SYN-RECEIPT-A",
+  "idempotency_ref": "SYN-KEY-A"
+}
